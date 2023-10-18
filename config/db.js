@@ -5,8 +5,8 @@ const Event = require("../models/upcoming-event.model");
 const moment = require('moment');
 require("dotenv").config()
 const connection = mongoose.connect(process.env.mongo_url)
-// cron.schedule('59 23 * * *', async () => {
-cron.schedule("*/6 * * * * *", async () => {
+cron.schedule('59 23 * * *', async () => {
+    // cron.schedule("*/6 * * * * *", async () => {
     const currentDate = moment().format("YYYY-MM-DD");
 
 
