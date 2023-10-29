@@ -6,11 +6,15 @@ const multer = require('multer')
 const storage = require("../middlewares/fileconfig");
 const { Query } = require("mongoose");
 const queryModel = require("../models/query.model");
-const cloudinary = require("cloudinary");
+const cloudinary = require("cloudinary").v2; // Import cloudinary as v2
+const fileUpload = require("express-fileupload");
+const streamifier = require('streamifier');
 
 
 const upload = multer({ storage: storage });
 dotenv.config();
+
+adminroute.use(fileUpload());
 
 adminroute.get("/events", async (req, res) => {
     try {
@@ -30,13 +34,30 @@ adminroute.get("/prev-events", async (req, res) => {
     }
 });
 
-adminroute.post("/upcoming-events", upload.single('thumbnail'), async (req, res) => {
+
+adminroute.post("/upcoming-events", async (req, res) => {
     try {
-        if (!req.file) {
+        if (!req.files || !req.files.thumbnail) {
             return res.status(400).send({ error: "No file uploaded" });
         }
 
-        const cloudinaryResponse = await cloudinary.uploader.upload(req.file.path);
+        const uploadedFile = req.files.thumbnail;
+
+        const stream = streamifier.createReadStream(uploadedFile.data);
+
+        const cloudinaryResponse = await new Promise((resolve, reject) => {
+            stream.pipe(
+                cloudinary.uploader.upload_stream({ resource_type: 'auto' }, (error, result) => {
+                    if (error) {
+                        console.error(error);
+                        reject(error);
+                    } else {
+                        resolve(result);
+                    }
+                })
+            );
+        });
+
         const eventData = {
             eventName: req.body.eventName,
             eventDate: req.body.eventDate,
@@ -45,6 +66,7 @@ adminroute.post("/upcoming-events", upload.single('thumbnail'), async (req, res)
             detailedDescription: req.body.detailedDescription,
             eventSummary: req.body.eventSummary,
         };
+
         const newEvent = new Event(eventData);
         const savedEvent = await newEvent.save();
 
