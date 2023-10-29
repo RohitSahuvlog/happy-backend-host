@@ -6,11 +6,18 @@ const { authroute } = require("./router/auth.route");
 const { userrouter } = require("./router/user.route");
 const { adminroute } = require("./router/admin.route");
 const { authorization } = require("./middlewares/authrisation");
+const cloudinary = require('cloudinary').v2;
+require("dotenv").config();
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 const path = require("path");
 const app = express();
 
-require("dotenv").config();
+
 app.use(express.json());
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));

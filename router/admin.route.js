@@ -6,6 +6,7 @@ const multer = require('multer')
 const storage = require("../middlewares/fileconfig");
 const { Query } = require("mongoose");
 const queryModel = require("../models/query.model");
+const cloudinary = require("cloudinary");
 
 
 const upload = multer({ storage: storage });
@@ -14,9 +15,6 @@ dotenv.config();
 adminroute.get("/events", async (req, res) => {
     try {
         const events = await Event.find({ isActive: true }).sort({ create_at: -1 });
-        events.forEach((event) => {
-            event.thumbnail = `${process.env.BACKEND_URL}/uploads/${event.thumbnail}`;
-        });
         res.status(200).send(events);
     } catch (error) {
         res.status(500).send({ error: "Internal Server Error" });
@@ -26,9 +24,6 @@ adminroute.get("/events", async (req, res) => {
 adminroute.get("/prev-events", async (req, res) => {
     try {
         let pastEvents = await Event.find({ isActive: false }).sort({ create_at: -1 });
-        pastEvents.forEach((event) => {
-            event.thumbnail = `${process.env.BACKEND_URL}/uploads/${event.thumbnail}`;
-        });
         res.status(200).send(pastEvents);
     } catch (error) {
         res.status(500).send({ error: "Internal Server Error" });
@@ -41,12 +36,12 @@ adminroute.post("/upcoming-events", upload.single('thumbnail'), async (req, res)
             return res.status(400).send({ error: "No file uploaded" });
         }
 
-
+        const cloudinaryResponse = await cloudinary.uploader.upload(req.file.path);
         const eventData = {
             eventName: req.body.eventName,
             eventDate: req.body.eventDate,
             googleFormLink: req.body.googleFormLink,
-            thumbnail: req.file.filename,
+            thumbnail: cloudinaryResponse.secure_url,
             detailedDescription: req.body.detailedDescription,
             eventSummary: req.body.eventSummary,
         };
