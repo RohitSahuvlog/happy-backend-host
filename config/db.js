@@ -4,10 +4,12 @@ const cron = require("node-cron");
 const Event = require("../models/upcoming-event.model");
 const moment = require('moment');
 require("dotenv").config()
-const connection = mongoose.connect(process.env.mongo_url)
+const winston = require('winston');
+
+const connection = mongoose.connect(process.env.mongo_url);
 cron.schedule('59 23 * * *', async () => {
     // cron.schedule("*/6 * * * * *", async () => {
-    const currentDate = moment().format("YYYY-MM-DD");
+    const currentDate = moment().tz('Asia/Kolkata').format("YYYY-MM-DD");
 
 
     try {
@@ -21,6 +23,7 @@ cron.schedule('59 23 * * *', async () => {
         console.log(`Updated ${pastEvents.length} events as inactive.`);
     } catch (error) {
         console.error("Error updating events:", error);
+        winston.error("Error updating events:", error);
     }
 });
 

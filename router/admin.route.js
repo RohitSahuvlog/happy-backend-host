@@ -18,7 +18,7 @@ adminroute.use(fileUpload());
 
 adminroute.get("/events", async (req, res) => {
     try {
-        const events = await Event.find({ isActive: true }).sort({ create_at: -1 });
+        const events = await Event.find({ isActive: true }).sort({ eventDate: -1 });
         res.status(200).send(events);
     } catch (error) {
         res.status(500).send({ error: "Internal Server Error" });
@@ -27,7 +27,7 @@ adminroute.get("/events", async (req, res) => {
 
 adminroute.get("/prev-events", async (req, res) => {
     try {
-        let pastEvents = await Event.find({ isActive: false }).sort({ create_at: -1 });
+        let pastEvents = await Event.find({ isActive: false }).sort({ eventDate: -1 });
         res.status(200).send(pastEvents);
     } catch (error) {
         res.status(500).send({ error: "Internal Server Error" });

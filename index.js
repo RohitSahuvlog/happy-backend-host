@@ -15,6 +15,7 @@ cloudinary.config({
 });
 
 const path = require("path");
+const Qrrouter = require("./router/qr.route");
 const app = express();
 
 
@@ -30,6 +31,7 @@ app.get("/", (req, res) => {
 
 app.use("/api/auth", authroute);
 app.use("/api/user", userrouter);
+app.use("/api", Qrrouter);
 // app.use(authentication);
 // authorization(["admin"]),
 app.use("/api/admin", adminroute);
